@@ -2,8 +2,8 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import tensorflow_version.transformer.Constants as Constants
-from tensorflow_version.transformer.Layers import EncoderLayer, DecoderLayer
+import pytorch_version.transformer.Constants as Constants
+from pytorch_version.transformer.Layers import EncoderLayer, DecoderLayer
 
 __author__ = "Yu-Hsiang Huang"
 
