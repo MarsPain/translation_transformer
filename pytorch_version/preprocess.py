@@ -8,7 +8,7 @@ def read_instances_from_file(inst_file, max_sent_len, keep_case):
 
     word_insts = []
     trimmed_sent_count = 0
-    with open(inst_file) as f:
+    with open(inst_file, "r", encoding="utf-8") as f:
         for sent in f:
             if not keep_case:
                 sent = sent.lower()
@@ -73,7 +73,7 @@ def main():
     parser.add_argument('-train_tgt', required=False, default="data/train.de")
     parser.add_argument('-valid_src', required=False, default="data/val.en")
     parser.add_argument('-valid_tgt', required=False, default="data/val.de")
-    parser.add_argument('-save_data', required=False, default="ckpt")
+    parser.add_argument('-save_data', required=False, default="train_val_dict.pkl") # 存储训练数据、验证数据、两种语言的字符和索引之间的映射字典
     parser.add_argument('-max_len', '--max_word_seq_len', type=int, default=50)
     parser.add_argument('-min_word_count', type=int, default=5)
     parser.add_argument('-keep_case', action='store_true')
