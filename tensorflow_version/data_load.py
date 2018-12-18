@@ -24,15 +24,17 @@ def load_en_vocab():
     idx2word = {idx: word for idx, word in enumerate(vocab)}
     return word2idx, idx2word
 
-def create_data(source_sents, target_sents): 
+def create_data(source_sents, target_sents):
+    # 分别加载两种语言的字符和索引之间的双向映射字典
     de2idx, idx2de = load_de_vocab()
     en2idx, idx2en = load_en_vocab()
     
     # Index
     x_list, y_list, Sources, Targets = [], [], [], []
     for source_sent, target_sent in zip(source_sents, target_sents):
+        # 对原始的字符串进行序列化，即将所有的字符替换成相应字符的索引
         x = [de2idx.get(word, 1) for word in (source_sent + u" </S>").split()] # 1: OOV, </S>: End of Text
-        y = [en2idx.get(word, 1) for word in (target_sent + u" </S>").split()] 
+        y = [en2idx.get(word, 1) for word in (target_sent + u" </S>").split()] # 在末尾补上</S>作为字符串的终结标志
         if max(len(x), len(y)) <=hp.maxlen:
             x_list.append(np.array(x))
             y_list.append(np.array(y))
@@ -43,15 +45,20 @@ def create_data(source_sents, target_sents):
     X = np.zeros([len(x_list), hp.maxlen], np.int32)
     Y = np.zeros([len(y_list), hp.maxlen], np.int32)
     for i, (x, y) in enumerate(zip(x_list, y_list)):
+        # 用numpy自带的函数进行padding
         X[i] = np.lib.pad(x, [0, hp.maxlen-len(x)], 'constant', constant_values=(0, 0))
         Y[i] = np.lib.pad(y, [0, hp.maxlen-len(y)], 'constant', constant_values=(0, 0))
     
     return X, Y, Sources, Targets
 
 def load_train_data():
+    # 获取所有不是以<开头的语句，即过滤多余信息，获取所有原始语言的字符串和目标语言的字符串
     de_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in codecs.open(hp.source_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
     en_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in codecs.open(hp.target_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
-    
+    # for i in range(100):
+    #     print("de_sents:", de_sents[i])
+    #     print("en_sents:", en_sents[i])
+    # 对训练集中的字符串进行处理，主要是获取两种语言的字符和索引之间的双向映射字典，并且对字符串进行padding
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
     return X[:400], Y[:400]
     
@@ -69,7 +76,7 @@ def load_test_data():
 
 def get_batch_data():
     # Load data
-    X, Y = load_train_data()
+    X, Y = load_train_data()    # 加载训练数据，x为原始的待翻译语言的字符串，y为目标语言的字符串
     
     # calc total batch count
     num_batch = len(X) // hp.batch_size

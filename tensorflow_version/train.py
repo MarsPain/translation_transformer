@@ -25,6 +25,7 @@ class Graph():
                 self.y = tf.placeholder(tf.int32, shape=(None, hp.maxlen))
 
             # define decoder inputs
+            # 注意这一步，对作为目标语言的真实标签y,在字符串的开头加上2，然后删除末尾的终结字符</S>，即形成错位，防止直接将答案作为decoder层的输入
             self.decoder_inputs = tf.concat((tf.ones_like(self.y[:, :1])*2, self.y[:, :-1]), -1) # 2:<S>
 
             # Load vocabulary    
@@ -116,7 +117,7 @@ class Graph():
                                                         num_heads=hp.num_heads, 
                                                         dropout_rate=hp.dropout_rate,
                                                         is_training=is_training,
-                                                        causality=True, 
+                                                        causality=True,     # 只有decoder的self-attention需要加入sequence mask，以遮盖来自未来的信息
                                                         scope="self_attention")
                         
                         ## Multihead Attention ( vanilla attention)
