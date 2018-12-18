@@ -69,11 +69,11 @@ def main():
     ''' Main function '''
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-train_src', required=True)
-    parser.add_argument('-train_tgt', required=True)
-    parser.add_argument('-valid_src', required=True)
-    parser.add_argument('-valid_tgt', required=True)
-    parser.add_argument('-save_data', required=True)
+    parser.add_argument('-train_src', required=False, default="data/train.en")
+    parser.add_argument('-train_tgt', required=False, default="data/train.de")
+    parser.add_argument('-valid_src', required=False, default="data/val.en")
+    parser.add_argument('-valid_tgt', required=False, default="data/val.de")
+    parser.add_argument('-save_data', required=False, default="ckpt")
     parser.add_argument('-max_len', '--max_word_seq_len', type=int, default=50)
     parser.add_argument('-min_word_count', type=int, default=5)
     parser.add_argument('-keep_case', action='store_true')
@@ -81,6 +81,7 @@ def main():
     parser.add_argument('-vocab', default=None)
 
     opt = parser.parse_args()
+    print("opt:", opt.train_src)
     opt.max_token_seq_len = opt.max_word_seq_len + 2 # include the <s> and </s>
 
     # Training set
