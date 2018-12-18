@@ -53,7 +53,7 @@ def load_train_data():
     en_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in codecs.open(hp.target_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
     
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
-    return X, Y
+    return X[:400], Y[:400]
     
 def load_test_data():
     def _refine(line):

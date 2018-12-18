@@ -138,7 +138,7 @@ class Graph():
             self.istarget = tf.to_float(tf.not_equal(self.y, 0))
             self.acc = tf.reduce_sum(tf.to_float(tf.equal(self.preds, self.y))*self.istarget)/ (tf.reduce_sum(self.istarget))
             tf.summary.scalar('acc', self.acc)
-                
+
             if is_training:  
                 # Loss
                 self.y_smoothed = label_smoothing(tf.one_hot(self.y, depth=len(en2idx)))
@@ -173,7 +173,7 @@ if __name__ == '__main__':
                 sess.run(g.train_op)
                 
             gs = sess.run(g.global_step)   
-            sv.saver.save(sess, hp.logdir + '/model_epoch_%02d_gs_%d' % (epoch, gs))
+            # sv.saver.save(sess, hp.logdir + '/model_epoch_%02d_gs_%d' % (epoch, gs))
     
     print("Done")    
     

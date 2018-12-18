@@ -14,7 +14,7 @@ class Hyperparams:
     target_test = 'corpora/IWSLT16.TED.tst2014.de-en.en.xml'
     
     # training
-    batch_size = 32 # alias = N
+    batch_size = 4 # alias = N
     lr = 0.0001 # learning rate. In paper, learning rate is adjusted to the global step.
     logdir = 'logdir' # log directory
     
