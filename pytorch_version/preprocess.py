@@ -13,6 +13,7 @@ def read_instances_from_file(inst_file, max_sent_len, keep_case):
             if not keep_case:
                 sent = sent.lower()
             words = sent.split()
+            # 记录有多少个样本序列的长度超过了预设的最大序列长度
             if len(words) > max_sent_len:
                 trimmed_sent_count += 1
             word_inst = words[:max_sent_len]
@@ -85,12 +86,12 @@ def main():
     opt.max_token_seq_len = opt.max_word_seq_len + 2 # include the <s> and </s>
 
     # Training set
-    train_src_word_insts = read_instances_from_file(
-        opt.train_src, opt.max_word_seq_len, opt.keep_case)
-    train_src_word_insts = train_src_word_insts[:2000]
+    # 读取训练集，并进行字符级的分割
+    train_src_word_insts = read_instances_from_file(opt.train_src, opt.max_word_seq_len, opt.keep_case)
     # print("train_src_word_insts:", train_src_word_insts)
-    train_tgt_word_insts = read_instances_from_file(
-        opt.train_tgt, opt.max_word_seq_len, opt.keep_case)
+    train_tgt_word_insts = read_instances_from_file(opt.train_tgt, opt.max_word_seq_len, opt.keep_case)
+    # 设置训练集大小
+    train_src_word_insts = train_src_word_insts[:2000]
     train_tgt_word_insts = train_tgt_word_insts[:2000]
 
     if len(train_src_word_insts) != len(train_tgt_word_insts):
@@ -128,22 +129,22 @@ def main():
         src_word2idx = predefined_data['dict']['src']
         tgt_word2idx = predefined_data['dict']['tgt']
     else:
+        # 如果原始语言和目标语言是同一种语言，则共享嵌入矩阵参数，也同样共享字符与索引之间的映射字典
         if opt.share_vocab:
             print('[Info] Build shared vocabulary for source and target.')
-            word2idx = build_vocab_idx(
-                train_src_word_insts + train_tgt_word_insts, opt.min_word_count)
+            word2idx = build_vocab_idx(train_src_word_insts + train_tgt_word_insts, opt.min_word_count)
             src_word2idx = tgt_word2idx = word2idx
         else:
             print('[Info] Build vocabulary for source.')
-            src_word2idx = build_vocab_idx(train_src_word_insts, opt.min_word_count)
+            src_word2idx = build_vocab_idx(train_src_word_insts, opt.min_word_count) # 获取原始语言的字符与索引之间的映射字典
             print('[Info] Build vocabulary for target.')
             tgt_word2idx = build_vocab_idx(train_tgt_word_insts, opt.min_word_count)
 
     # word to index
+    # 将训练集和验证集中的原始字符串和目标字符串都转换为序列，即将字符替换成索引
     print('[Info] Convert source word instances into sequences of word index.')
     train_src_insts = convert_instance_to_idx_seq(train_src_word_insts, src_word2idx)
     valid_src_insts = convert_instance_to_idx_seq(valid_src_word_insts, src_word2idx)
-
     print('[Info] Convert target word instances into sequences of word index.')
     train_tgt_insts = convert_instance_to_idx_seq(train_tgt_word_insts, tgt_word2idx)
     valid_tgt_insts = convert_instance_to_idx_seq(valid_tgt_word_insts, tgt_word2idx)
