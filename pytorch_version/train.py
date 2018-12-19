@@ -25,6 +25,7 @@ def cal_performance(pred, gold, smoothing=False):
     gold = gold.contiguous().view(-1)
     non_pad_mask = gold.ne(Constants.PAD)
     n_correct = pred.eq(gold)
+    # 找到既满足non_pad_mask又满足n_correct的预测，即为真正正确的预测
     n_correct = n_correct.masked_select(non_pad_mask).sum().item()
 
     return loss, n_correct
@@ -83,8 +84,8 @@ def train_epoch(model, training_data, optimizer, device, smoothing):
         # note keeping
         total_loss += loss.item()
 
-        non_pad_mask = gold.ne(Constants.PAD)
-        n_word = non_pad_mask.sum().item()
+        non_pad_mask = gold.ne(Constants.PAD)   # ne函数对元素不相等的索引位置进行标记
+        n_word = non_pad_mask.sum().item()  # 获取样本序列的真实长度
         n_word_total += n_word
         n_word_correct += n_correct
 
@@ -224,16 +225,17 @@ def main():
     opt.d_word_vec = opt.d_model
 
     #========= Loading Dataset =========#
-    data = torch.load(opt.data)
+    data = torch.load(opt.data)  # 从pkl文件中恢复数据
     opt.max_token_seq_len = data['settings'].max_token_seq_len
 
-    training_data, validation_data = prepare_dataloaders(data, opt)
+    training_data, validation_data = prepare_dataloaders(data, opt)  # 处理和加载训练集和验证集
 
     opt.src_vocab_size = training_data.dataset.src_vocab_size
     opt.tgt_vocab_size = training_data.dataset.tgt_vocab_size
 
     #========= Preparing Model =========#
     if opt.embs_share_weight:
+        # 若要两个嵌入层共享嵌入参数矩阵，则必须是两种相同的语言且映射字典相同
         assert training_data.dataset.src_word2idx == training_data.dataset.tgt_word2idx, \
             'The src/tgt word2idx table are different but asked to share word embedding.'
 
@@ -266,15 +268,15 @@ def main():
 
 def prepare_dataloaders(data, opt):
     # ========= Preparing DataLoader =========#
-    train_loader = torch.utils.data.DataLoader(
-        TranslationDataset(
+    train_loader = torch.utils.data.DataLoader(  # 通过torch.utils.data.DataLoader类加载数据集，完成batch size和shuffle等设置
+        TranslationDataset(  # 通过torch.utils.data.Dataset类构造pytorch数据集，方便获取数据集大小并通过索引读取数据
             src_word2idx=data['dict']['src'],
             tgt_word2idx=data['dict']['tgt'],
             src_insts=data['train']['src'],
             tgt_insts=data['train']['tgt']),
-        num_workers=2,
+        num_workers=2,  # 设置线程
         batch_size=opt.batch_size,
-        collate_fn=paired_collate_fn,
+        collate_fn=paired_collate_fn,   # 通过调用paired_collate_fn函数完成padding
         shuffle=True)
 
     valid_loader = torch.utils.data.DataLoader(

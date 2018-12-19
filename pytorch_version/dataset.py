@@ -36,7 +36,7 @@ class TranslationDataset(torch.utils.data.Dataset):
         assert src_insts
         assert not tgt_insts or (len(src_insts) == len(tgt_insts))
 
-        src_idx2word = {idx:word for word, idx in src_word2idx.items()}
+        src_idx2word = {idx:word for word, idx in src_word2idx.items()}  # 反转字符到索引的映射字典已得到索引到字符的映射字典
         self._src_word2idx = src_word2idx
         self._src_idx2word = src_idx2word
         self._src_insts = src_insts
