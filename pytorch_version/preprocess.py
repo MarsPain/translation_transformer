@@ -87,8 +87,11 @@ def main():
     # Training set
     train_src_word_insts = read_instances_from_file(
         opt.train_src, opt.max_word_seq_len, opt.keep_case)
+    train_src_word_insts = train_src_word_insts[:2000]
+    # print("train_src_word_insts:", train_src_word_insts)
     train_tgt_word_insts = read_instances_from_file(
         opt.train_tgt, opt.max_word_seq_len, opt.keep_case)
+    train_tgt_word_insts = train_tgt_word_insts[:2000]
 
     if len(train_src_word_insts) != len(train_tgt_word_insts):
         print('[Warning] The training instance count is not equal.')
