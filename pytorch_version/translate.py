@@ -24,7 +24,7 @@ def main():
                         help="""Path to output the predictions (each line will
                         be the decoded sequence""")
     parser.add_argument('-beam_size', type=int, default=5,
-                        help='Beam size')
+                        help='Beam size')   # 进行集束搜索时的集束宽
     parser.add_argument('-batch_size', type=int, default=4,
                         help='Batch size')
     parser.add_argument('-n_best', type=int, default=1,
@@ -58,7 +58,7 @@ def main():
 
     with open(opt.output, 'w', encoding="utf-8") as f:
         for batch in tqdm(test_loader, mininterval=2, desc='  - (Test)', leave=False):
-            all_hyp, all_scores = translator.translate_batch(*batch)
+            all_hyp, all_scores = translator.translate_batch(*batch)    # 基于训练得到的参数和集束搜索对最终的序列进行预测
             # print("all_hyp:", all_hyp)
             for idx_seqs in all_hyp:
                 for idx_seq in idx_seqs:

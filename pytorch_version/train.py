@@ -68,6 +68,10 @@ def train_epoch(model, training_data, optimizer, device, smoothing):
 
         # prepare data
         src_seq, src_pos, tgt_seq, tgt_pos = map(lambda x: x.to(device), batch)
+        # print("src_seq:", src_seq[0])
+        # print("src_pos:", src_pos[0])
+        # print("tgt_seq:", tgt_seq[0])
+        # print("tgt_pos:", tgt_pos[0])
         gold = tgt_seq[:, 1:]
 
         # forward
@@ -276,7 +280,7 @@ def prepare_dataloaders(data, opt):
             tgt_insts=data['train']['tgt']),
         num_workers=2,  # 设置线程
         batch_size=opt.batch_size,
-        collate_fn=paired_collate_fn,   # 通过调用paired_collate_fn函数完成padding
+        collate_fn=paired_collate_fn,   # 通过调用paired_collate_fn函数完成padding，并添加表示位置的数组，用于进行位置嵌入
         shuffle=True)
 
     valid_loader = torch.utils.data.DataLoader(

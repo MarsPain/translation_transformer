@@ -111,7 +111,7 @@ class Translator(object):
 
             n_active_inst = len(inst_idx_to_position_map)
 
-            dec_seq = prepare_beam_dec_seq(inst_dec_beams, len_dec_seq)
+            dec_seq = prepare_beam_dec_seq(inst_dec_beams, len_dec_seq) # 根据上一轮搜索到的使序列概率最高的字符更新这一轮的decoder的输入
             dec_pos = prepare_beam_dec_pos(len_dec_seq, n_active_inst, n_bm)
             word_prob = predict_word(dec_seq, dec_pos, src_seq, enc_output, n_active_inst, n_bm)
 
@@ -139,11 +139,15 @@ class Translator(object):
             #-- Repeat data for beam search
             n_bm = self.opt.beam_size
             n_inst, len_s, d_h = src_enc.size()
+            # print("src_seq：", src_seq.size())
             src_seq = src_seq.repeat(1, n_bm).view(n_inst * n_bm, len_s)
+            # print("src_seq：", src_seq.size())
+            # print("src_enc：", src_enc.size())
             src_enc = src_enc.repeat(1, n_bm, 1).view(n_inst * n_bm, len_s, d_h)
+            # print("src_enc：", src_enc.size())
 
             #-- Prepare beams
-            inst_dec_beams = [Beam(n_bm, device=self.device) for _ in range(n_inst)]
+            inst_dec_beams = [Beam(n_bm, device=self.device) for _ in range(n_inst)]    # 初始化集束搜索类
 
             #-- Bookkeeping for active or not
             active_inst_idx_list = list(range(n_inst))
@@ -151,15 +155,15 @@ class Translator(object):
 
             #-- Decode
             for len_dec_seq in range(1, self.model_opt.max_token_seq_len + 1):
-
+                # 根据预设的最大长度逐步地进行搜索
                 active_inst_idx_list = beam_decode_step(
                     inst_dec_beams, len_dec_seq, src_seq, src_enc, inst_idx_to_position_map, n_bm)
 
-                if not active_inst_idx_list:
+                if not active_inst_idx_list:    # active_inst_idx_list保存的是没有搜索完成、即没有搜索到<EOS>的样本索引
                     break  # all instances have finished their path to <EOS>
 
                 src_seq, src_enc, inst_idx_to_position_map = collate_active_info(
-                    src_seq, src_enc, inst_idx_to_position_map, active_inst_idx_list)
+                    src_seq, src_enc, inst_idx_to_position_map, active_inst_idx_list)   # 根据当前剩余的需要继续搜索的样本数更新输入到decoder层的数据
 
         batch_hyp, batch_scores = collect_hypothesis_and_scores(inst_dec_beams, self.opt.n_best)
 
