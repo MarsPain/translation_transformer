@@ -105,7 +105,7 @@ class Translator(object):
                 for inst_idx, inst_position in inst_idx_to_position_map.items():
                     is_inst_complete = inst_beams[inst_idx].advance(word_prob[inst_position])
                     if not is_inst_complete:
-                        active_inst_idx_list += [inst_idx]
+                        active_inst_idx_list += [inst_idx]  # 如果该样本的搜索没有结束，则将其索引添加到该列表中
 
                 return active_inst_idx_list
 
@@ -113,7 +113,7 @@ class Translator(object):
 
             dec_seq = prepare_beam_dec_seq(inst_dec_beams, len_dec_seq) # 根据上一轮搜索到的使序列概率最高的字符更新这一轮的decoder的输入
             dec_pos = prepare_beam_dec_pos(len_dec_seq, n_active_inst, n_bm)
-            word_prob = predict_word(dec_seq, dec_pos, src_seq, enc_output, n_active_inst, n_bm)
+            word_prob = predict_word(dec_seq, dec_pos, src_seq, enc_output, n_active_inst, n_bm)    # 将新的数据输入到decoder层获得新的对字符的预测
 
             # Update the beam with predicted word prob information and collect incomplete instances
             active_inst_idx_list = collect_active_inst_idx_list(
